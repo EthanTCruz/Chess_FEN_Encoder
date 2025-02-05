@@ -27,7 +27,12 @@ struct pieceBitMap{
             {"r", bitset<4>(8)},
             {"b", bitset<4>(9)},
             {"n", bitset<4>(10)},
-            {"p", bitset<4>(11)}
+            {"p", bitset<4>(11)},
+
+            {"p with ep",bitset<4>(12)},
+            {"r with cr",bitset<4>(13)},
+            {"P with ep",bitset<4>(12)},
+            {"R with cr",bitset<4>(13)},
         }),
         lexInt({
             {'a', 0}, 
@@ -78,6 +83,26 @@ void insertBitset(std::bitset<120>& bigSet, const std::bitset<4>& smallSet, std:
     }
 }
 
+int squareToInt(string square){
+    if (square == "-") {
+        return -1;
+    }
+    int file = square[0] - 'a';
+    int rank = square[1] - '1';
+    return rank * 8 + file;
+}
+
+int extractEnPassant(string enPassant,char turn){
+    int intSquare = squareToInt(enPassant);
+    if (turn == 'w'){
+        intSquare += 8;
+    } else {
+        intSquare -= 8;
+    }
+    return intSquare;
+}
+
+
 bitset<6> getKingPosition(int position) {
     int row = position / 8;
     int col = position % 8;
@@ -93,7 +118,7 @@ bitset<6> getKingPosition(int position) {
 }
 
 // Decode a FEN string into a Board.
-bitset<120> encodeFEN(const string& fen) {
+pair<bitset<120>, bitset<64> >encodeFEN(const string& fen) {
     Board board;
     istringstream iss(fen);
     
@@ -106,7 +131,7 @@ bitset<120> encodeFEN(const string& fen) {
 
     if (parts.size() < 6) {
         cerr << "Error: Invalid FEN string." << endl;
-        return bitset<120>();
+        return make_pair(bitset<120> (), bitset<64> ());
     }
 
     // Initialize bitsets
@@ -129,7 +154,7 @@ bitset<120> encodeFEN(const string& fen) {
     cout << "En Passant: " << enPassant << endl;
     cout << "Halfmove Clock: " << halfmoveClock << endl;
     cout << "Fullmove Number: " << fullmoveNumber << endl;
-
+    int epSquare;
     // === 2nd Loop: Process the Board Pieces ===
     string boardPart = parts[0];
     int boardPos = 0;       // Board index from 0-63
@@ -142,7 +167,8 @@ bitset<120> encodeFEN(const string& fen) {
             // Skip empty squares based on number
             int emptyCount = c - '0';
             boardPos += emptyCount;
-        } else {
+
+        } else 
             // If piece is found, encode it
             if (c == 'K') {
                 whiteKingPosBits = getKingPosition(boardPos);
@@ -159,10 +185,11 @@ bitset<120> encodeFEN(const string& fen) {
                 piecesFound++;
             }
             boardPos++; // Move to the next board position
-        }
+        
     }
 
-return pieceType;
+
+return make_pair(pieceType, boardBits);
 }
 
 
@@ -262,6 +289,15 @@ void printPieceType(const std::bitset<120>& bitset) {
     }
     cout << "\n";
 }
+void printBoard(const std::bitset<64>& bitset) {
+    for (int i = 0; i < bitset.size(); ++i) {
+        cout << bitset[i] << "";
+        if ((i + 1) % 8 == 0) {
+            cout << "\n";
+        }
+    }
+    cout << "\n";
+}
 
 int main() {
     // Example FEN string for the starting position.
@@ -279,10 +315,10 @@ int main() {
     bitset<120> pieceType;
     // pieceBitMap pieceMap;
     // insertBitset(pieceType,pieceMap.globalHashMap["p"],0);
-    pieceType = encodeFEN(fen);
+    pair<bitset<120>, bitset<64>> result = encodeFEN(fen);
 
-    printPieceType(pieceType);
-
+    printPieceType(result.first);
+    printBoard(result.second);
     // cout << "Original FEN: " << pieceType << "\n";
     return 0;
 }
