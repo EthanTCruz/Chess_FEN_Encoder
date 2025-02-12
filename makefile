@@ -1,36 +1,27 @@
-# Compiler
+# Compiler and flags
 CXX = g++
-
-# Compiler flags
-CXXFLAGS = -Wall -g
+CXXFLAGS = -Wall -g 
 
 # Target executable
-TARGET = main
-
-# For deleting the target
-TARGET_DEL = main.exe
+TARGET = myprogram
 
 # Source files
-SRCS = encoder.cpp
+SRCS = main.cpp
 
 # Object files
 OBJS = $(SRCS:.cpp=.o)
 
-# Default rule to build and run the executable
-all: $(TARGET) run
+# Default target
+all: $(TARGET)
 
-# Rule to link object files into the target executable
+# Rule to build the target executable
 $(TARGET): $(OBJS)
-    $(CXX) $(CXXFLAGS) -o $(TARGET) $(OBJS)
+	$(CXX) $(CXXFLAGS) $(OBJS) -o $(TARGET)
 
-# Rule to compile .cpp files into .o files
+# Rule to compile object files
 %.o: %.cpp
-    $(CXX) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-# Rule to run the executable
-run: $(TARGET)
-    $(TARGET)
-
-# Clean rule to remove generated files
+# Rule to clean up
 clean:
-    del $(TARGET_DEL) $(OBJS)
+	rm -f $(OBJS) $(TARGET)
