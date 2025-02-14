@@ -89,11 +89,12 @@ void insertSubBitset(bitset<120>& bigSet, const bitset<4>& smallSet, size_t posi
 int fenSquareToIndex(const string& square,const char& turn) {
    if (square == "-")
        return -1;
-   int file = square[0] - 'a';
+   int file = square[0] - 'a' + 1;
    
-   int rank = square[1] - '1';
+   int rank = square[1] - '1' - 1;
+   cout << "ep index before rank removed: " << rank * 8 + file << "\n";
    rank += (turn == 'w' ? -1 : 1);
-   return rank * 8 + file;
+   return rank * 8 + file ;
 }
 int getEnPassantIndex(const string& enPassant, const char& turn) {
    int index = fenSquareToIndex(enPassant,turn);
@@ -147,6 +148,7 @@ tuple<bitset<120>, bitset<62>, bitset<12>> encodeFenToBitboards(const string& fe
    bitset<120> pieceTypeBitset;
    bitset<12> kingPositionBitset;
    bitset<6> whiteKingBitset, blackKingBitset;
+   bool wKingfound = false, bKingFound = false;
    FenPieceEncoder fenEncoder;
    auto[activeColor, castlingRightsParsed, enPassant, halfmoveClock, fullmoveNumber, epSquare, boardPart] = dismantleFEN(fen);
    int boardPos = 0, piecesFound = 0;
@@ -157,10 +159,12 @@ tuple<bitset<120>, bitset<62>, bitset<12>> encodeFenToBitboards(const string& fe
        } else if (isdigit(c)) {
            boardPos += c - '0';
        } else if (c == 'K') {
+            epSquare--;
            whiteKingBitset = bitset<6>(boardPos);
            for (size_t j = 0; j < 6; ++j)
                kingPositionBitset.set(j, whiteKingBitset[j]);
        } else if (c == 'k') {
+        epSquare--;
            blackKingBitset = bitset<6>(boardPos);
            for (size_t j = 0; j < 6; ++j)
                kingPositionBitset.set(kingPositionBitset.size() - 6 + j, blackKingBitset[j]);
@@ -182,7 +186,7 @@ tuple<bitset<120>, bitset<62>, bitset<12>> encodeFenToBitboards(const string& fe
                insertSubBitset(pieceTypeBitset, fenEncoder.pieceMapping[string(1, c)], piecesFound);
                piecesFound++;
            }
-           cout << "set piece:  " << c << " at: " << boardPos << "\n";
+           cout << "set piece:  " << c << " at: " << boardPos << " ep index: " << epSquare << "\n";
            occupancyBitset.set(boardPos, true);
            boardPos++;
        }
@@ -310,15 +314,18 @@ string generateFenPieceOrder(const bitset<62>& occupancy, const bitset<120>& pie
 }
 int main() {
     // string fen = "rnbqkbnr/pppp1ppp/4p3/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e3 0 1";
-    // string fen = "rnbqkbnr/pp2pppp/8/2ppP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3";
-    string fen = "rnbqkbnr/pp2pppp/4P3/3p4/2pP4/8/PPP2PPP/RNBQKBNR b KQkq d3 0 4";
-    // string fen = "rnbqkbnr/pp2pppp/4P3/3p4/2pP4/8/PPP2PPP/RNBQKBNR b KQkq d3 0 4";
+    // string expected_fen = "rnbqkbnr/1pp1pppp/p7/3pP with ep3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3 (ep: 27)";
+    // string fen = "rnbqkbnr/1pp1pppp/p7/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3";
+    string expected_fen = "rnbqkbnr/1pp1pppp/p7/4P3/2P with epp4/P7/1P1P1PPP/RNBQKBNR b KQkq c3 0 4 (ep: 33)";
+    string fen = "rnbqkbnr/1pp1pppp/p7/4P3/2Pp4/P7/1P1P1PPP/RNBQKBNR b KQkq c3 0 4";
+
     ChessBoard board = fenToChessBoard(fen);
     auto bitboards = encodeFenToBitboards(fen);
     // printPieceTypeBitset(get<0>(bitboards));
     // printOccupancyBitset(get<1>(bitboards));
     string decoeded_fen = generateFenPieceOrder(get<1>(bitboards), get<0>(bitboards), get<2>(bitboards));
-    cout << "original\n" << fen << "\n";
-    cout << decoeded_fen << "\n";
+    cout << "original: " << fen << "\n";
+    cout << "expected: " << expected_fen << "\n";
+    cout << "actual:   " <<decoeded_fen << "\n";
     return 0;
 }
