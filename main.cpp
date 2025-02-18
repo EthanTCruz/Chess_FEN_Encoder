@@ -322,7 +322,7 @@ int main() {
     // string fen = "rnbqkbnr/pppp1ppp/4p3/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e3 0 1";
     string expected_fen = "rnbqkbnr/1pp1pppp/p7/3pP with ep3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3 (ep: 27)";
     string fen = "rnbqkbnr/1pp1pppp/p7/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3";
-    // string expected_fen = "rnbqkbnr/1pp1pppp/p7/4P3/2P with epp4/P7/1P1P1PPP/RNBQKBNR b KQkq c3 0 4 (ep: 33)";
+    // string expected_fen = "rnbqkbnr/1pp1pppp/p7/4P3/2P with epp4/P7/1P1P1PPP/RNBQKBNR b KQkq c3 0 4 (ep: 33, true: 34)";
     // string fen = "rnbqkbnr/1pp1pppp/p7/4P3/2Pp4/P7/1P1P1PPP/RNBQKBNR b KQkq c3 0 4";
 
     ChessBoard board = fenToChessBoard(fen);
