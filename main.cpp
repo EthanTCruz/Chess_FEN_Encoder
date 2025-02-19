@@ -90,17 +90,18 @@ void insertSubBitset(bitset<120>& bigSet, const bitset<4>& smallSet, size_t posi
 int fenSquareToIndex(const string& square,const char& turn) {
    if (square == "-")
        return -1;
-   int file = square[0] - 'a' ;
+   int file = square[0] - 'a';
    
-   int rank = square[1] - '1' ;
+   int rank = square[1] - '1' + 1;
    cout <<"rank: " << rank << " file: " << file << " square: " << square <<"\n" ;
-   cout << "ep index before rank removed: " << rank * 8 + file << "\n";
 //    rank += (turn == 'w' ? -1 : 1);
-   return rank * 8 + file;
+   return (8-rank)*8 + file;
 }
 int getEnPassantIndex(const string& enPassant, const char& turn) {
    int index = fenSquareToIndex(enPassant,turn);
-   index += (turn == 'w' ? -8 : 8) + 7;
+   if (index == -1){return index;}
+   cout << "original index: " << index << "\n";
+   index += (turn == 'w' ? 8 : -8) ;
    cout << "ep index: " << index << "\n";
    return index;
 }
@@ -191,7 +192,7 @@ tuple<bitset<120>, bitset<62>, bitset<12>> encodeFenToBitboards(const string& fe
                insertSubBitset(pieceTypeBitset, fenEncoder.pieceMapping[string(1, c)], piecesFound);
                piecesFound++;
            }
-           cout << "set piece:  " << c << " is white: " << (isupper(c) != 256) << " at: " << boardPos << " ep index: " << epSquare << " True board pos: " << truePos <<"\n" ;
+           cout << "set piece:  " << c << " is white: " << isupper(c)  << " at: " << boardPos << " ep index: " << epSquare << " True board pos: " << truePos <<"\n" ;
            occupancyBitset.set(boardPos, true);
            boardPos++;
            truePos += 1;
@@ -320,10 +321,10 @@ string generateFenPieceOrder(const bitset<62>& occupancy, const bitset<120>& pie
 }
 int main() {
     // string fen = "rnbqkbnr/pppp1ppp/4p3/8/8/8/PPPPPPPP/RNBQKBNR w KQkq e3 0 1";
-    string expected_fen = "rnbqkbnr/1pp1pppp/p7/3pP with ep3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3 (ep: 27)";
-    string fen = "rnbqkbnr/1pp1pppp/p7/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3";
-    // string expected_fen = "rnbqkbnr/1pp1pppp/p7/4P3/2P with epp4/P7/1P1P1PPP/RNBQKBNR b KQkq c3 0 4 (ep: 33, true: 34)";
-    // string fen = "rnbqkbnr/1pp1pppp/p7/4P3/2Pp4/P7/1P1P1PPP/RNBQKBNR b KQkq c3 0 4";
+    // string expected_fen = "rnbqkbnr/1pp1pppp/p7/3pP with ep3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3 (ep: 27, true: 35)";
+    // string fen = "rnbqkbnr/1pp1pppp/p7/3pP3/8/8/PPPP1PPP/RNBQKBNR w KQkq d6 0 3";
+    string expected_fen = "rnbqkbnr/1pp1pppp/p7/4P3/2Pp with ep4/P7/1P1P1PPP/RNBQKBNR b KQkq c3 0 4 (ep: 33, true: 34)";
+    string fen = "rnbqkbnr/1pp1pppp/p7/4P3/2Pp4/P7/1P1P1PPP/RNBQKBNR b KQkq c3 0 4";
 
     ChessBoard board = fenToChessBoard(fen);
     auto bitboards = encodeFenToBitboards(fen);
